@@ -1,0 +1,25 @@
+{
+  "name": "@ipv4-calc/core",
+  "version": "1.0.0",
+  "description": "IPv4 서브넷 계산기 핵심 라이브러리",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "keywords": [
+    "ipv4",
+    "subnet",
+    "calculator"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "@types/node": "^18.15.0",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.0.0"
+  }
+} 

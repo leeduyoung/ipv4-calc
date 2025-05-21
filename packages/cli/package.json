@@ -1,0 +1,33 @@
+{
+  "name": "@ipv4-calc/cli",
+  "version": "1.0.0",
+  "description": "IPv4 서브넷 계산기 CLI",
+  "main": "dist/index.js",
+  "bin": {
+    "ipv4-calc": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts"
+  },
+  "keywords": [
+    "ipv4",
+    "subnet",
+    "calculator",
+    "cli"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@ipv4-calc/core": "^1.0.0",
+    "commander": "^9.0.0",
+    "table": "^6.8.0",
+    "chalk": "^4.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "^18.15.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.0.0"
+  }
+} 

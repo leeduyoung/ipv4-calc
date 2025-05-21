@@ -1,0 +1,30 @@
+{
+  "name": "ipv4-calc",
+  "version": "1.0.0",
+  "description": "IPv4 서브넷 계산기",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "core:build": "npm run build --workspace=@ipv4-calc/core",
+    "cli:build": "npm run build --workspace=@ipv4-calc/cli",
+    "web:build": "npm run build --workspace=@ipv4-calc/web",
+    "cli": "npm run start --workspace=@ipv4-calc/cli",
+    "web:dev": "npm run dev --workspace=@ipv4-calc/web",
+    "build": "npm run core:build && npm run cli:build && npm run web:build",
+    "test": "npm run test --workspaces"
+  },
+  "keywords": [
+    "ipv4",
+    "subnet",
+    "calculator",
+    "network",
+    "cidr",
+    "cli",
+    "react",
+    "typescript"
+  ],
+  "author": "",
+  "license": "MIT"
+} 
