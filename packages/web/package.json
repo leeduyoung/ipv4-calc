@@ -2,12 +2,14 @@
   "name": "@ipv4-calc/web",
   "version": "1.0.0",
   "description": "IPv4 서브넷 계산기 웹 애플리케이션",
+  "private": true,
   "main": "dist/index.js",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "clean": "rm -rf dist node_modules",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "vercel --prod"
   },
   "keywords": [
     "ipv4",
@@ -17,6 +19,9 @@
   ],
   "author": "",
   "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  },
   "dependencies": {
     "@ipv4-calc/core": "1.0.0",
     "react": "^18.2.0",
@@ -29,6 +34,7 @@
     "@types/styled-components": "^5.1.26",
     "@vitejs/plugin-react": "^3.1.0",
     "typescript": "^5.0.0",
+    "vercel": "^33.7.1",
     "vite": "^4.2.0"
   }
-} 
+}

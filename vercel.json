@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "packages/web/package.json",
+      "use": "@vercel/node",
+      "config": {
+        "buildCommand": "cd ../.. && npm run web:build",
+        "outputDirectory": "packages/web/dist"
+      }
+    }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "/packages/web/dist/$1" }
+  ]
+} 
