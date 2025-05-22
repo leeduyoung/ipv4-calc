@@ -2,6 +2,7 @@
   "name": "@ipv4-calc/cli",
   "version": "1.0.0",
   "description": "IPv4 서브넷 계산기 CLI",
+  "type": "module",
   "main": "dist/index.js",
   "bin": {
     "ipv4-calc": "dist/index.js"
@@ -21,13 +22,15 @@
   "license": "MIT",
   "dependencies": {
     "@ipv4-calc/core": "^1.0.0",
+    "@types/inquirer": "^9.0.8",
+    "chalk": "^4.1.2",
     "commander": "^9.0.0",
-    "table": "^6.8.0",
-    "chalk": "^4.1.2"
+    "inquirer": "^12.6.1",
+    "table": "^6.8.0"
   },
   "devDependencies": {
     "@types/node": "^18.15.0",
     "ts-node": "^10.9.0",
     "typescript": "^5.0.0"
   }
-} 
+}
