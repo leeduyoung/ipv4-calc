@@ -110,7 +110,7 @@ npm run web:dev
 
 ### 온라인 버전
 
-웹 애플리케이션은 Vercel에 배포되어 있습니다. [여기](https://ipv4-calc.vercel.app)에서 사용할 수 있습니다.
+웹 애플리케이션은 Vercel에 배포되어 있습니다. [여기](https://ipv4-calc-web.vercel.app/)에서 사용할 수 있습니다.
 
 ## 기여하기
 
