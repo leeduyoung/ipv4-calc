@@ -133,7 +133,4 @@ class SubnetCalculator {
   }
 }
 
-// 클래스의 인스턴스를 생성하여 export
 export const subnetCalculator = new SubnetCalculator();
-// SubnetCalculator 이름으로도 export
-export { subnetCalculator as SubnetCalculator }; 

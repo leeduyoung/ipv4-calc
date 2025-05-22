@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { subnetCalculator as SubnetCalculator } from '@ipv4-calc/core';
+import { subnetCalculator } from '@ipv4-calc/core';
 import { isValidCIDR, isValidIPv4 } from '@ipv4-calc/core';
 import { SubnetInfo, SubnetCalculationResult, SubnetDetails } from '@ipv4-calc/core';
 import InputForm from './components/InputForm';
@@ -67,11 +67,11 @@ const App = () => {
       
       // 기본 서브넷 계산
       let calculationResult: SubnetInfo = 
-        SubnetCalculator.calculate(networkAddress, subnetMask);
+      subnetCalculator.calculate(networkAddress, subnetMask);
       
       // 서브넷 수가 지정된 경우 세부 서브넷 계산
       if (subnetCount && parseInt(subnetCount) > 0) {
-        calculationResult = SubnetCalculator.calculateSubnets(
+        calculationResult = subnetCalculator.calculateSubnets(
           networkAddress,
           subnetMask,
           parseInt(subnetCount)

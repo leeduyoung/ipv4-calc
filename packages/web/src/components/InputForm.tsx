@@ -1,5 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import { 
+  cidrToSubnetMask, 
+  isValidCIDR, 
+  calculateNumberOfHosts,
+  subnetMaskToCIDR 
+} from '@ipv4-calc/core';
 
 interface InputFormProps {
   onCalculate: (
@@ -15,15 +21,24 @@ const FormContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  
+  @media (max-width: 768px) {
+    gap: 1rem;
+    padding: 0 1rem;
+  }
 `;
 
 const FormRow = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 1.5rem;
   
   @media (max-width: 768px) {
     flex-direction: column;
+    gap: 1rem;
   }
 `;
 
@@ -36,6 +51,11 @@ const FormGroup = styled.div`
     margin-bottom: 0.5rem;
     font-weight: 500;
     color: #34495e;
+    
+    @media (max-width: 768px) {
+      font-size: 0.95rem;
+      margin-bottom: 0.3rem;
+    }
   }
   
   input, select {
@@ -51,6 +71,22 @@ const FormGroup = styled.div`
       outline: none;
       border-color: #3498db;
     }
+    
+    @media (max-width: 768px) {
+      padding: 0.6rem;
+      font-size: 0.95rem;
+    }
+  }
+`;
+
+const InfoText = styled.div`
+  color: #3498db;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  
+  @media (max-width: 768px) {
+    font-size: 0.85rem;
+    margin-top: 0.3rem;
   }
 `;
 
@@ -58,6 +94,11 @@ const ErrorMessage = styled.div`
   color: #e74c3c;
   font-size: 0.9rem;
   margin-top: 0.5rem;
+  
+  @media (max-width: 768px) {
+    font-size: 0.85rem;
+    margin-top: 0.3rem;
+  }
 `;
 
 const CalculateButton = styled.button`
@@ -74,25 +115,94 @@ const CalculateButton = styled.button`
   &:hover {
     background-color: #2980b9;
   }
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    font-size: 0.95rem;
+    text-align: center;
+  }
+`;
+
+const Spacer = styled.div`
+  margin-top: 1.5rem;
+  
+  @media (max-width: 768px) {
+    margin-top: 1rem;
+  }
 `;
 
 const InputForm = ({ onCalculate, error }: InputFormProps) => {
+  const [networkCidr, setNetworkCidr] = useState('10.0.0.0/16');
   const [networkAddress, setNetworkAddress] = useState('10.0.0.0');
-  const [subnetMask, setSubnetMask] = useState('255.255.255.0');
+  const [subnetMask, setSubnetMask] = useState('255.255.0.0');
   const [hostCount, setHostCount] = useState('');
   const [subnetCount, setSubnetCount] = useState('');
+  const [availableSubnetMasks, setAvailableSubnetMasks] = useState<Array<{value: string, label: string}>>([]);
+  const [validCidr, setValidCidr] = useState(true);
+  const [calculatedHostCount, setCalculatedHostCount] = useState<number>(0);
+  const [calculatedSubnetCount, setCalculatedSubnetCount] = useState<number>(0);
   
-  const commonSubnetMasks = [
-    { value: '255.0.0.0', label: '255.0.0.0/8' },
-    { value: '255.255.0.0', label: '255.255.0.0/16' },
-    { value: '255.255.255.0', label: '255.255.255.0/24' },
-    { value: '255.255.255.128', label: '255.255.255.128/25' },
-    { value: '255.255.255.192', label: '255.255.255.192/26' },
-    { value: '255.255.255.224', label: '255.255.255.224/27' },
-    { value: '255.255.255.240', label: '255.255.255.240/28' },
-    { value: '255.255.255.248', label: '255.255.255.248/29' },
-    { value: '255.255.255.252', label: '255.255.255.252/30' }
-  ];
+  // CIDR에서 네트워크 주소와 서브넷 마스크 추출
+  useEffect(() => {
+    if (isValidCIDR(networkCidr)) {
+      setValidCidr(true);
+      const [ipAddress, cidrPrefix] = networkCidr.split('/');
+      setNetworkAddress(ipAddress);
+      
+      const prefix = parseInt(cidrPrefix, 10);
+      if (!isNaN(prefix) && prefix >= 0 && prefix <= 32) {
+        const mask = cidrToSubnetMask(prefix);
+        setSubnetMask(mask);
+        
+        // 사용 가능한 서브넷 마스크 목록 생성 (현재 CIDR 이상만 허용)
+        const masks = [];
+        for (let i = prefix; i <= 30; i++) {
+          const newMask = cidrToSubnetMask(i);
+          masks.push({
+            value: newMask,
+            label: `${newMask}/${i}`
+          });
+        }
+        setAvailableSubnetMasks(masks);
+        
+        // 초기 호스트 수와 서브넷 수 계산
+        calculateHostAndSubnetCount(mask, parseInt(cidrPrefix, 10));
+      }
+    } else {
+      setValidCidr(false);
+    }
+  }, [networkCidr]);
+  
+  // 서브넷 마스크 변경 시 호스트 수와 서브넷 수 계산
+  const calculateHostAndSubnetCount = (mask: string, originalCidr?: number) => {
+    const subnetCidr = subnetMaskToCIDR(mask);
+    const hosts = calculateNumberOfHosts(subnetCidr);
+    setCalculatedHostCount(hosts);
+    setHostCount(hosts.toString());
+    
+    // 서브넷 수 계산 (원래 CIDR과 선택한 서브넷 마스크의 CIDR 차이에 따라)
+    if (originalCidr !== undefined) {
+      const subnets = Math.pow(2, subnetCidr - originalCidr);
+      setCalculatedSubnetCount(subnets);
+      setSubnetCount(subnets.toString());
+    }
+  };
+  
+  const handleNetworkCidrChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNetworkCidr(e.target.value);
+  };
+  
+  const handleSubnetMaskChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newSubnetMask = e.target.value;
+    setSubnetMask(newSubnetMask);
+    
+    // 호스트 수와 서브넷 수 계산
+    if (isValidCIDR(networkCidr)) {
+      const cidrPrefix = parseInt(networkCidr.split('/')[1], 10);
+      calculateHostAndSubnetCount(newSubnetMask, cidrPrefix);
+    }
+  };
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,15 +214,16 @@ const InputForm = ({ onCalculate, error }: InputFormProps) => {
       <form onSubmit={handleSubmit}>
         <FormRow>
           <FormGroup>
-            <label htmlFor="networkAddress">네트워크 주소 블록</label>
+            <label htmlFor="networkCidr">네트워크 주소 블록 (CIDR)</label>
             <input
-              id="networkAddress"
+              id="networkCidr"
               type="text"
-              value={networkAddress}
-              onChange={(e) => setNetworkAddress(e.target.value)}
-              placeholder="예: 192.168.1.0"
+              value={networkCidr}
+              onChange={handleNetworkCidrChange}
+              placeholder="예: 192.168.1.0/24"
               required
             />
+            {!validCidr && <ErrorMessage>유효하지 않은 CIDR 표기법입니다.</ErrorMessage>}
           </FormGroup>
           
           <FormGroup>
@@ -120,10 +231,11 @@ const InputForm = ({ onCalculate, error }: InputFormProps) => {
             <select
               id="subnetMask"
               value={subnetMask}
-              onChange={(e) => setSubnetMask(e.target.value)}
+              onChange={handleSubnetMaskChange}
               required
+              disabled={!validCidr}
             >
-              {commonSubnetMasks.map((mask) => (
+              {availableSubnetMasks.map((mask) => (
                 <option key={mask.value} value={mask.value}>
                   {mask.label}
                 </option>
@@ -131,6 +243,8 @@ const InputForm = ({ onCalculate, error }: InputFormProps) => {
             </select>
           </FormGroup>
         </FormRow>
+        
+        <Spacer />
         
         <FormRow>
           <FormGroup>
@@ -160,7 +274,8 @@ const InputForm = ({ onCalculate, error }: InputFormProps) => {
         
         {error && <ErrorMessage>{error}</ErrorMessage>}
         
-        <CalculateButton type="submit">계산하기</CalculateButton>
+        <Spacer />
+        <CalculateButton type="submit" disabled={!validCidr}>계산하기</CalculateButton>
       </form>
     </FormContainer>
   );
